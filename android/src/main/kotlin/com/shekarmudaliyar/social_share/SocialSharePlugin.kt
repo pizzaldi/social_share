@@ -135,7 +135,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           val content: String? = call.argument("content")
           val whatsappIntent = Intent(Intent.ACTION_SEND)
           whatsappIntent.type = "text/plain"
-          whatsappIntent.setPackage("com.whatsapp")
+          whatsappIntent.setPackage("com.twitter.android/com.twitter.app.dm.DMActivity")
           whatsappIntent.putExtra(Intent.EXTRA_TEXT, content)
           try {
               registrar.activity().startActivity(whatsappIntent)
