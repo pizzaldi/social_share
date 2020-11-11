@@ -252,20 +252,29 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               result.success("false")
           }
       }else if(call.method == "shareTwitter"){
-          //shares content on twitter
-          val text: String? = call.argument("captionText")
-          val url: String? = call.argument("url")
-          val trailingText: String? = call.argument("trailingText")
-          val urlScheme = "http://www.twitter.com/intent/tweet?text=$text$url$trailingText"
-          Log.d("log",urlScheme)
-          val intent = Intent(Intent.ACTION_VIEW)
-          intent.data = Uri.parse(urlScheme)
+          //shares content on WhatsApp
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
+          val twitterIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              twitterIntent.type = "image/*"
+              twitterIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              twitterIntent.type = "text/plain";
+          }
+          twitterIntent.setPackage("com.twitter.android")
+          twitterIntent.setClassName("com.twitter.android",
+            "com.twitter.composer.ComposerActivity");
+          twitterIntent.putExtra(Intent.EXTRA_TEXT, content)
           try {
-              registrar.activity().startActivity(intent)
+              registrar.activity().startActivity(twitterIntent)
               result.success("true")
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
-
           }
       }else if(call.method == "shareTwitterDM"){
           //shares content on Twitter
@@ -297,14 +306,14 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
       else if(call.method == "shareInstagramDM"){
           //shares content on Instagram Chats
           val content: String? = call.argument("content")
-          val twitterDMIntent = Intent(Intent.ACTION_SEND)
-          twitterDMIntent.type = "text/plain"
-          twitterDMIntent.setPackage("com.instagram.android")
-          twitterDMIntent.setClassName("com.instagram.android",
-            "com.instagram.direct.share.handler.DirectShareHandlerActivityInterop");
-          twitterDMIntent.putExtra(Intent.EXTRA_TEXT, content)
+          val instagramDMIntent = Intent(Intent.ACTION_SEND)
+          instagramDMIntent.type = "text/plain"
+          instagramDMIntent.setPackage("com.instagram.android")
+        //   twitterDMIntent.setClassName("com.instagram.android",
+        //     "com.instagram.direct.share.handler.DirectShareHandlerActivityInterop");
+          instagramDMIntent.putExtra(Intent.EXTRA_TEXT, content)
           try {
-              registrar.activity().startActivity(twitterDMIntent)
+              registrar.activity().startActivity(instagramDMIntent)
               result.success("true")
           } catch (ex: ActivityNotFoundException) {
               result.success("false")

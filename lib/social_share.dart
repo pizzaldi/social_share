@@ -323,8 +323,7 @@ class SocialShare {
         args = <String, dynamic>{"image": imagePath, "content": contentText};
       }
     }
-    final String version =
-        await _channel.invokeMethod('shareTwitterPost', args);
+    final String version = await _channel.invokeMethod('shareTwitter', args);
     return version;
   }
 
