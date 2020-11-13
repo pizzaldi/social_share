@@ -130,11 +130,46 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           val clip = ClipData.newPlainText("", content)
           clipboard.setPrimaryClip(clip)
           result.success(true)
+      }else if(call.method == "shareFacebook"){
+          //shares content on WhatsApp
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
+          val facebookIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              facebookIntent.type = "image/*"
+              facebookIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              facebookIntent.type = "text/plain";
+          }
+          facebookIntent.setPackage("com.facebook.katana")
+          facebookIntent.setClassName("com.facebook.katana",
+            "com.facebook.composer.shareintent.ImplicitShareIntentHandlerDefaultAlias");
+        //   facebookIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(facebookIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
       }else if(call.method == "shareWhatsapp"){
           //shares content on WhatsApp
           val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
           val whatsappIntent = Intent(Intent.ACTION_SEND)
-          whatsappIntent.type = "text/plain"
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              whatsappIntent.type = "image/*"
+              whatsappIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              whatsappIntent.type = "text/plain";
+          }
           whatsappIntent.setPackage("com.whatsapp")
           whatsappIntent.putExtra(Intent.EXTRA_TEXT, content)
           try {
@@ -142,16 +177,21 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               result.success("true")
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
-
           }
       }else if(call.method == "shareSms"){
           //shares content on sms
-          val content: String? = call.argument("message")
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+          val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+
+
           val intent = Intent(Intent.ACTION_SENDTO)
           intent.addCategory(Intent.CATEGORY_DEFAULT)
           intent.type = "vnd.android-dir/mms-sms"
           intent.data = Uri.parse("sms:" )
           intent.putExtra("sms_body", content)
+          intent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
           try {
               registrar.activity().startActivity(intent)
               result.success("true")
@@ -159,32 +199,173 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               result.success("false")
 
           }
-      }else if(call.method == "shareTwitter"){
-          //shares content on twitter
-          val text: String? = call.argument("captionText")
-          val url: String? = call.argument("url")
-          val trailingText: String? = call.argument("trailingText")
-          val urlScheme = "http://www.twitter.com/intent/tweet?text=$text$url$trailingText"
-          Log.d("log",urlScheme)
-          val intent = Intent(Intent.ACTION_VIEW)
-          intent.data = Uri.parse(urlScheme)
+        //   val intent = Intent(Intent.ACTION_SEND)
+        //   if(image!=null){
+        //       //check if  image is also provided
+        //       val imagefile =  File(registrar.activeContext().cacheDir,image)
+        //       val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+        //     //   intent.type = "image/jpeg"
+        //       intent.putExtra(Intent.EXTRA_STREAM, imageFileUri)
+        //   } else {
+        //       intent.type = "text/plain";
+        //   }
+        // //   intent.addCategory(Intent.CATEGORY_DEFAULT)
+        // //   intent.type = "vnd.android-dir/mms-sms"
+        //   intent.data = Uri.parse("smsto:" )
+        //   intent.putExtra("sms_body", content)
+          
+        //   try {
+        //       registrar.activity().startActivity(intent)
+        //     // val chooserIntent: Intent = Intent.createChooser(intent, null /* dialog title optional */)
+
+        // //   registrar.activeContext().startActivity(chooserIntent)
+        //       result.success("true")
+        //   } catch (ex: ActivityNotFoundException) {
+        //       result.success("false")
+
+        //   }
+      }else if(call.method == "shareInstagram"){
+          //shares content on Twitter
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
+          val instagramIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              instagramIntent.type = "image/*"
+              instagramIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              instagramIntent.type = "text/plain";
+          }
+
+          instagramIntent.setPackage("com.instagram.android")
+          instagramIntent.setClassName("com.instagram.android",
+            "com.instagram.share.handleractivity.ShareHandlerActivity");
+            
+          instagramIntent.putExtra(Intent.EXTRA_TEXT, content)
           try {
-              registrar.activity().startActivity(intent)
+              registrar.activity().startActivity(instagramIntent)
               result.success("true")
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
+          }
+      }else if(call.method == "shareTwitter"){
+          //shares content on WhatsApp
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
 
+          val twitterIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              twitterIntent.type = "image/*"
+              twitterIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              twitterIntent.type = "text/plain";
+          }
+          twitterIntent.setPackage("com.twitter.android")
+          twitterIntent.setClassName("com.twitter.android",
+            "com.twitter.composer.ComposerActivity");
+          twitterIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(twitterIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
+      }else if(call.method == "shareTwitterDM"){
+          //shares content on Twitter
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
+          val twitterDMIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              twitterDMIntent.type = "image/*"
+              twitterDMIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              twitterDMIntent.type = "text/plain";
+          }
+
+          twitterDMIntent.setPackage("com.twitter.android")
+          twitterDMIntent.setClassName("com.twitter.android",
+            "com.twitter.app.dm.DMActivity");
+          twitterDMIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(twitterDMIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
+      }
+      else if(call.method == "shareInstagramDM"){
+          //shares content on Instagram Chats
+          val content: String? = call.argument("content")
+          val instagramDMIntent = Intent(Intent.ACTION_SEND)
+          instagramDMIntent.type = "text/plain"
+          instagramDMIntent.setPackage("com.instagram.android")
+        //   twitterDMIntent.setClassName("com.instagram.android",
+        //     "com.instagram.direct.share.handler.DirectShareHandlerActivityInterop");
+          instagramDMIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(instagramDMIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
           }
       }
       else if(call.method == "shareTelegram"){
           //shares content on Telegram
           val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
           val telegramIntent = Intent(Intent.ACTION_SEND)
-          telegramIntent.type = "text/plain"
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              telegramIntent.type = "image/*"
+              telegramIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              telegramIntent.type = "text/plain";
+          }
+
           telegramIntent.setPackage("org.telegram.messenger")
           telegramIntent.putExtra(Intent.EXTRA_TEXT, content)
           try {
               registrar.activity().startActivity(telegramIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+
+          }
+      }else if(call.method == "shareEmail"){
+          //shares content on Telegram
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+
+          val emailIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              emailIntent.type = "image/*"
+              emailIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              emailIntent.type = "text/plain";
+          }
+
+          emailIntent.setPackage("com.google.android.gm")
+          emailIntent.setClassName("com.google.android.gm",
+            "com.google.android.gm.ComposeActivityGmailExternal");
+          emailIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(emailIntent)
               result.success("true")
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
