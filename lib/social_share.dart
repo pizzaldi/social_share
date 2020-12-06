@@ -181,12 +181,12 @@ class SocialShare {
         "trailingText": Uri.parse(trailingText).toString()
       };
     }
-    print('hello');
     final String version = await _channel.invokeMethod('shareTwitter', args);
     return version;
   }
 
-  static Future<String> shareSms(String contentText, {String imagePath}) async {
+  static Future<String> shareSms(String contentText,
+      {String imagePath, String phoneNumber}) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
       args = <String, dynamic>{"image": imagePath, "content": contentText};
@@ -201,9 +201,17 @@ class SocialShare {
         final imageDataPath = '${tempDir.path}/$imageName';
         file = await File(imageDataPath).create();
         file.writeAsBytesSync(imageAsList);
-        args = <String, dynamic>{"image": imageName, "content": contentText};
+        args = <String, dynamic>{
+          "image": imageName,
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
       } else {
-        args = <String, dynamic>{"image": imagePath, "content": contentText};
+        args = <String, dynamic>{
+          "image": imagePath,
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
       }
     }
     final String version = await _channel.invokeMethod('shareSms', args);
@@ -244,7 +252,7 @@ class SocialShare {
   }
 
   static Future<String> shareWhatsapp(String contentText,
-      {String imagePath}) async {
+      {String imagePath, String phoneNumber}) async {
     Map<String, dynamic> args;
     if (Platform.isIOS) {
       args = <String, dynamic>{"image": imagePath, "content": contentText};
@@ -259,9 +267,16 @@ class SocialShare {
         final imageDataPath = '${tempDir.path}/$imageName';
         file = await File(imageDataPath).create();
         file.writeAsBytesSync(imageAsList);
-        args = <String, dynamic>{"image": imageName, "content": contentText};
+        args = <String, dynamic>{
+          "image": imageName,
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
       } else {
-        args = <String, dynamic>{"image": imagePath, "content": contentText};
+        args = <String, dynamic>{
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
       }
     }
     // final Map<String, dynamic> args = <String, dynamic>{"content": content};

@@ -159,6 +159,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           //shares content on WhatsApp
           val content: String? = call.argument("content")
           val image: String? = call.argument("image")
+          val phoneNumber: String? = call.argument("phoneNumber")
 
           val whatsappIntent = Intent(Intent.ACTION_SEND)
           if(image!=null){
@@ -169,6 +170,9 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               whatsappIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
           } else {
               whatsappIntent.type = "text/plain";
+          }
+          if(phoneNumber != null){
+              whatsappIntent.putExtra("jid", phoneNumber + "@s.whatsapp.net");
           }
           whatsappIntent.setPackage("com.whatsapp")
           whatsappIntent.putExtra(Intent.EXTRA_TEXT, content)
@@ -182,14 +186,15 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           //shares content on sms
           val content: String? = call.argument("content")
           val image: String? = call.argument("image")
-          val imagefile =  File(registrar.activeContext().cacheDir,image)
-              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+          val phoneNumber: String? = call.argument("phoneNumber")
 
+          val imagefile =  File(registrar.activeContext().cacheDir,image)
+          val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
 
           val intent = Intent(Intent.ACTION_SENDTO)
           intent.addCategory(Intent.CATEGORY_DEFAULT)
           intent.type = "vnd.android-dir/mms-sms"
-          intent.data = Uri.parse("sms:" )
+          intent.data = Uri.parse("sms:" + phoneNumber)
           intent.putExtra("sms_body", content)
           intent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
           try {
@@ -197,33 +202,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               result.success("true")
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
-
           }
-        //   val intent = Intent(Intent.ACTION_SEND)
-        //   if(image!=null){
-        //       //check if  image is also provided
-        //       val imagefile =  File(registrar.activeContext().cacheDir,image)
-        //       val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
-        //     //   intent.type = "image/jpeg"
-        //       intent.putExtra(Intent.EXTRA_STREAM, imageFileUri)
-        //   } else {
-        //       intent.type = "text/plain";
-        //   }
-        // //   intent.addCategory(Intent.CATEGORY_DEFAULT)
-        // //   intent.type = "vnd.android-dir/mms-sms"
-        //   intent.data = Uri.parse("smsto:" )
-        //   intent.putExtra("sms_body", content)
-          
-        //   try {
-        //       registrar.activity().startActivity(intent)
-        //     // val chooserIntent: Intent = Intent.createChooser(intent, null /* dialog title optional */)
-
-        // //   registrar.activeContext().startActivity(chooserIntent)
-        //       result.success("true")
-        //   } catch (ex: ActivityNotFoundException) {
-        //       result.success("false")
-
-        //   }
       }else if(call.method == "shareInstagram"){
           //shares content on Twitter
           val content: String? = call.argument("content")
