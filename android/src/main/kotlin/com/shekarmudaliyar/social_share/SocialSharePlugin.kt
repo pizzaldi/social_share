@@ -144,6 +144,8 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               facebookIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
           } else {
               facebookIntent.type = "text/plain";
+              facebookIntent.putExtra(Intent.EXTRA_TEXT, content);
+              facebookIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(content));
           }
           facebookIntent.setPackage("com.facebook.katana")
           facebookIntent.setClassName("com.facebook.katana",
@@ -188,6 +190,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           val image: String? = call.argument("image")
           val phoneNumber: String? = call.argument("phoneNumber")
 
+        if(image!=null){
           val imagefile =  File(registrar.activeContext().cacheDir,image)
           val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
 
@@ -203,6 +206,20 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
           }
+        }else{
+          val intent = Intent(Intent.ACTION_SENDTO)
+          intent.addCategory(Intent.CATEGORY_DEFAULT)
+          intent.type = "vnd.android-dir/mms-sms"
+          intent.data = Uri.parse("sms:" + phoneNumber)
+          intent.putExtra("sms_body", content)
+          try {
+              registrar.activity().startActivity(intent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
+        }
+          
       }else if(call.method == "shareInstagram"){
           //shares content on Twitter
           val content: String? = call.argument("content")
