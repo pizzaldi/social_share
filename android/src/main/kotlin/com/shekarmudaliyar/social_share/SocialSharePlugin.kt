@@ -367,6 +367,33 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               result.success("false")
 
           }
+      } else if (call.method == "shareWABusiness") {
+          //shares content on WhatsApp for Business
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+          val phoneNumber: String? = call.argument("phoneNumber")
+
+          val whatsappBusinessIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              whatsappBusinessIntent.type = "image/*"
+              whatsappBusinessIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              whatsappBusinessIntent.type = "text/plain";
+          }
+          if(phoneNumber != null){
+              whatsappBusinessIntent.putExtra("jid", phoneNumber + "@s.whatsapp.net");
+          }
+          whatsappBusinessIntent.setPackage("com.whatsapp.w4b")
+          whatsappBusinessIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(whatsappBusinessIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
       }
       else if(call.method == "checkInstalledApps"){
           //check if the apps exists
@@ -389,6 +416,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           apps["twitter"] = packages.any  {it.packageName.toString().contentEquals("com.twitter.android")}
           apps["whatsapp"] = packages.any  {it.packageName.toString().contentEquals("com.whatsapp")}
           apps["telegram"] = packages.any  {it.packageName.toString().contentEquals("org.telegram.messenger")  }
+          apps["whatsapp_business"] = packages.any  {it.packageName.toString().contentEquals("com.whatsapp.w4b")  }
 
           result.success(apps)
           } else {
