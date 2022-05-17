@@ -251,39 +251,6 @@ class SocialShare {
     return version;
   }
 
-  static Future<String> shareWhatsapp(String contentText,
-      {String imagePath, String phoneNumber}) async {
-    Map<String, dynamic> args;
-    if (Platform.isIOS) {
-      args = <String, dynamic>{"image": imagePath, "content": contentText};
-    } else {
-      if (imagePath != null) {
-        File file = File(imagePath);
-        Uint8List bytes = file.readAsBytesSync();
-        var imagedata = bytes.buffer.asUint8List();
-        final tempDir = await getTemporaryDirectory();
-        String imageName = 'share.png';
-        final Uint8List imageAsList = imagedata;
-        final imageDataPath = '${tempDir.path}/$imageName';
-        file = await File(imageDataPath).create();
-        file.writeAsBytesSync(imageAsList);
-        args = <String, dynamic>{
-          "image": imageName,
-          "content": contentText,
-          "phoneNumber": phoneNumber
-        };
-      } else {
-        args = <String, dynamic>{
-          "content": contentText,
-          "phoneNumber": phoneNumber
-        };
-      }
-    }
-    // final Map<String, dynamic> args = <String, dynamic>{"content": content};
-    final String version = await _channel.invokeMethod('shareWhatsapp', args);
-    return version;
-  }
-
   static Future<String> shareInstagram(String contentText,
       {String imagePath}) async {
     Map<String, dynamic> args;
@@ -420,6 +387,97 @@ class SocialShare {
     }
     final String version = await _channel.invokeMethod('shareEmail', args);
     return version;
+  }
+
+  static Future<String> shareWhatsapp(String contentText,
+      {String imagePath, String phoneNumber}) async {
+    Map<String, dynamic> args;
+    if (Platform.isIOS) {
+      args = <String, dynamic>{"image": imagePath, "content": contentText};
+    } else {
+      if (imagePath != null) {
+        File file = File(imagePath);
+        Uint8List bytes = file.readAsBytesSync();
+        var imagedata = bytes.buffer.asUint8List();
+        final tempDir = await getTemporaryDirectory();
+        String imageName = 'share.png';
+        final Uint8List imageAsList = imagedata;
+        final imageDataPath = '${tempDir.path}/$imageName';
+        file = await File(imageDataPath).create();
+        file.writeAsBytesSync(imageAsList);
+        args = <String, dynamic>{
+          "image": imageName,
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
+      } else {
+        args = <String, dynamic>{
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
+      }
+    }
+    // final Map<String, dynamic> args = <String, dynamic>{"content": content};
+    final String version = await _channel.invokeMethod('shareWhatsapp', args);
+    return version;
+  }
+
+  static Future<String> shareWABusiness(String contentText,
+      {String imagePath, String phoneNumber}) async {
+    Map<String, dynamic> args;
+    if (Platform.isIOS) {
+      args = <String, dynamic>{"image": imagePath, "content": contentText};
+    } else {
+      if (imagePath != null) {
+        File file = File(imagePath);
+        Uint8List bytes = file.readAsBytesSync();
+        var imagedata = bytes.buffer.asUint8List();
+        final tempDir = await getTemporaryDirectory();
+        String imageName = 'share.png';
+        final Uint8List imageAsList = imagedata;
+        final imageDataPath = '${tempDir.path}/$imageName';
+        file = await File(imageDataPath).create();
+        file.writeAsBytesSync(imageAsList);
+        args = <String, dynamic>{
+          "image": imageName,
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
+      } else {
+        args = <String, dynamic>{
+          "content": contentText,
+          "phoneNumber": phoneNumber
+        };
+      }
+    }
+    // final Map<String, dynamic> args = <String, dynamic>{"content": content};
+    final String version = await _channel.invokeMethod('shareWABusiness', args);
+    return version;
+  }
+
+  // Only works in Android
+  static Future<String> verifyWhatsAppNumber(
+      String contentText, String phoneNumber) async {
+    Map<String, dynamic> args;
+    args = <String, dynamic>{
+      "content": contentText,
+      "phoneNumber": phoneNumber
+    };
+    final String payload =
+        await _channel.invokeMethod('verifyWhatsAppNumber', args);
+    return payload;
+  }
+
+  static Future<String> verifyWhatsAppBusinessNumber(
+      String contentText, String phoneNumber) async {
+    Map<String, dynamic> args;
+    args = <String, dynamic>{
+      "content": contentText,
+      "phoneNumber": phoneNumber
+    };
+    final String payload =
+        await _channel.invokeMethod('verifyWhatsAppBusinessNumber', args);
+    return payload;
   }
 
   // static Future<String> shareSlack() async {

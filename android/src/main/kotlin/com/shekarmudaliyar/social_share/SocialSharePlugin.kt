@@ -144,6 +144,8 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               facebookIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
           } else {
               facebookIntent.type = "text/plain";
+              facebookIntent.putExtra(Intent.EXTRA_TEXT, content);
+              facebookIntent.putExtra(Intent.EXTRA_STREAM, Uri.parse(content));
           }
           facebookIntent.setPackage("com.facebook.katana")
           facebookIntent.setClassName("com.facebook.katana",
@@ -188,6 +190,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           val image: String? = call.argument("image")
           val phoneNumber: String? = call.argument("phoneNumber")
 
+        if(image!=null){
           val imagefile =  File(registrar.activeContext().cacheDir,image)
           val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
 
@@ -203,6 +206,20 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           } catch (ex: ActivityNotFoundException) {
               result.success("false")
           }
+        }else{
+          val intent = Intent(Intent.ACTION_SENDTO)
+          intent.addCategory(Intent.CATEGORY_DEFAULT)
+          intent.type = "vnd.android-dir/mms-sms"
+          intent.data = Uri.parse("sms:" + phoneNumber)
+          intent.putExtra("sms_body", content)
+          try {
+              registrar.activity().startActivity(intent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
+        }
+          
       }else if(call.method == "shareInstagram"){
           //shares content on Twitter
           val content: String? = call.argument("content")
@@ -350,8 +367,57 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
               result.success("false")
 
           }
-      }
-      else if(call.method == "checkInstalledApps"){
+      } else if (call.method == "shareWABusiness") {
+          //shares content on WhatsApp for Business
+          val content: String? = call.argument("content")
+          val image: String? = call.argument("image")
+          val phoneNumber: String? = call.argument("phoneNumber")
+
+          val whatsappBusinessIntent = Intent(Intent.ACTION_SEND)
+          if(image!=null){
+              //check if  image is also provided
+              val imagefile =  File(registrar.activeContext().cacheDir,image)
+              val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+              whatsappBusinessIntent.type = "image/*"
+              whatsappBusinessIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+          } else {
+              whatsappBusinessIntent.type = "text/plain";
+          }
+          if(phoneNumber != null){
+              whatsappBusinessIntent.putExtra("jid", phoneNumber + "@s.whatsapp.net");
+          }
+          whatsappBusinessIntent.setPackage("com.whatsapp.w4b")
+          whatsappBusinessIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(whatsappBusinessIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
+      } else if (call.method == "verifyWhatsAppNumber" || call.method == "verifyWhatsAppBusinessNumber") {
+          //verify Whatsapp number by setting the data with wa.me content
+          val content: String? = call.argument("content")
+          val phoneNumber: String? = call.argument("phoneNumber")
+          val whatsappIntent = Intent(Intent.ACTION_SEND)
+          whatsappIntent.type = "text/plain";
+          whatsappIntent.setData(Uri.parse("https://wa.me/"+phoneNumber+"?text=%20"))
+          if(call.method == "verifyWhatsAppNumber"){
+              whatsappIntent.setPackage("com.whatsapp")
+          whatsappIntent.setClassName("com.whatsapp",
+            "com.whatsapp.TextAndDirectChatDeepLink")
+          }else if(call.method == "verifyWhatsAppBusinessNumber"){
+            whatsappIntent.setPackage("com.whatsapp.w4b")
+          whatsappIntent.setClassName("com.whatsapp.w4b",
+            "com.whatsapp.TextAndDirectChatDeepLink");
+          }
+          whatsappIntent.putExtra(Intent.EXTRA_TEXT, content)
+          try {
+              registrar.activity().startActivity(whatsappIntent)
+              result.success("true")
+          } catch (ex: ActivityNotFoundException) {
+              result.success("false")
+          }
+      } else if(call.method == "checkInstalledApps"){
           //check if the apps exists
           //creating a mutable map of apps
           var apps:MutableMap<String, Boolean> = mutableMapOf()
@@ -372,6 +438,7 @@ class SocialSharePlugin(private val registrar: Registrar):  MethodCallHandler {
           apps["twitter"] = packages.any  {it.packageName.toString().contentEquals("com.twitter.android")}
           apps["whatsapp"] = packages.any  {it.packageName.toString().contentEquals("com.whatsapp")}
           apps["telegram"] = packages.any  {it.packageName.toString().contentEquals("org.telegram.messenger")  }
+          apps["whatsapp_business"] = packages.any  {it.packageName.toString().contentEquals("com.whatsapp.w4b")  }
 
           result.success(apps)
           } else {
