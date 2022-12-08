@@ -241,7 +241,34 @@ class SocialSharePlugin:FlutterPlugin, MethodCallHandler, ActivityAware {
             } catch (ex: ActivityNotFoundException) {
                 result.success("false")
             }
-        } else if (call.method == "shareWABusiness") {
+        } else if(call.method == "shareEmail"){
+            //shares content on Telegram
+            val content: String? = call.argument("content")
+            val image: String? = call.argument("image")
+
+            val emailIntent = Intent(Intent.ACTION_SEND)
+            if(image!=null){
+                //check if  image is also provided
+                val imagefile =  File(registrar.activeContext().cacheDir,image)
+                val imageFileUri = FileProvider.getUriForFile(registrar.activeContext(), registrar.activeContext().applicationContext.packageName + ".com.shekarmudaliyar.social_share", imagefile)
+                emailIntent.type = "image/*"
+                emailIntent.putExtra(Intent.EXTRA_STREAM,imageFileUri)
+            } else {
+                emailIntent.type = "text/plain";
+            }
+
+            emailIntent.setPackage("com.google.android.gm")
+            emailIntent.setClassName("com.google.android.gm",
+                    "com.google.android.gm.ComposeActivityGmailExternal");
+            emailIntent.putExtra(Intent.EXTRA_TEXT, content)
+            try {
+                registrar.activity().startActivity(emailIntent)
+                result.success("true")
+            } catch (ex: ActivityNotFoundException) {
+                result.success("false")
+
+            }
+        }else if (call.method == "shareWABusiness") {
             //shares content on WhatsApp for Business
             val content: String? = call.argument("content")
             val image: String? = call.argument("image")
